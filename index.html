@@ -163,7 +163,7 @@
                                 </div>
                             </div>
                             <h1>Email Berhasil Dikonfirmasi!</h1>
-                            <p>Halo, <strong id="username" style="color: #f8fafc;"></strong>...!!!<br>Terima kasih telah memverifikasi alamat email Anda. Akun Anda kini sudah aktif dan siap untuk digunakan.</p>
+                            <p>Hallo, <strong id="username" style="color: #f8fafc;"></strong>...!!!<br>Terima kasih telah memverifikasi alamat email Anda. Akun Anda kini sudah aktif dan siap untuk digunakan.</p>
                             <a href="#!" class="btn-primary">Silahkan Signin di Aplikasi</a>
                         </td>
                     </tr>
@@ -185,42 +185,40 @@
             const urlParams = new URLSearchParams(window.location.search);
             const tokenHash = urlParams.get('token_hash');
             const type = urlParams.get('type') || 'signup';
-            const emailFromParam = urlParams.get('email');
-            if (usernameEl && emailFromParam) {
-                usernameEl.textContent = emailFromParam;
+
+            function setDisplayName(user) {
+                const displayName = user?.user_metadata?.nama || "User Mikroangkot";
+                if (usernameEl) usernameEl.textContent = displayName;
             }
+
             try {
                 const SUPABASE_URL = 'https://oeqvxtzsufqehqhvunqn.supabase.co';
                 const SUPABASE_ANON_KEY = 'sb_publishable_XcXuyOBPYxVq7ynbp-jw9g_j5qiPDIZ';
                 const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
                 if (tokenHash) {
                     const { data, error } = await sbClient.auth.verifyOtp({
                         token_hash: tokenHash,
                         type: type
                     });
+
                     if (!error && data?.user) {
-                        const user = data.user;
-                        const displayName = user.user_metadata?.nama || 
-                                            user.user_metadata?.full_name || 
-                                            user.user_metadata?.name || 
-                                            user.email || 
-                                            emailFromParam || 
-                                            "User Mikroangkot";
-                        if (usernameEl) usernameEl.textContent = displayName;
+                        setDisplayName(data.user);
                         return;
                     }
                 }
+
                 const { data: { session } } = await sbClient.auth.getSession();
                 if (session?.user) {
-                    const user = session.user;
-                    usernameEl.textContent = user.user_metadata?.nama || user.email || emailFromParam || "User Mikroangkot";
-                } else if (usernameEl && !usernameEl.textContent) {
-                    usernameEl.textContent = emailFromParam || "User Mikroangkot";
+                    setDisplayName(session.user);
+                } else if (usernameEl) {
+                    usernameEl.textContent = "User Mikroangkot";
                 }
+
             } catch (err) {
                 console.error("Info verifikasi:", err.message);
-                if (usernameEl && !usernameEl.textContent) {
-                    usernameEl.textContent = emailFromParam || "User Mikroangkot";
+                if (usernameEl) {
+                    usernameEl.textContent = "User Mikroangkot";
                 }
             }
         })();
