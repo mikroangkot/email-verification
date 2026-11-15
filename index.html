@@ -8,9 +8,9 @@
     <meta name="copyright" content="Rumah Djigo">
     <meta property="og:title" content="Mikroangkot Team">
     <meta property="og:description" content="Mikroangkot Team">
-    <meta property="og:image" content="https://cdn.jsdelivr.net/gh/mikroangkot/assets/images/icons/tj.svg">
+    <meta property="og:image" content="https://cdn.jsdelivr.net/gh/thejaklingko/assets/images/tj.svg">
     <title>Email Confirmation</title>
-    <link rel="icon" href="https://cdn.jsdelivr.net/gh/mikroangkot/assets/images/icons/tj.svg">
+    <link rel="icon" href="https://cdn.jsdelivr.net/gh/thejaklingko/assets/images/tj.svg">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
@@ -182,7 +182,8 @@
     <script>
         const SUPABASE_URL = 'https://oeqvxtzsufqehqhvunqn.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_XcXuyOBPYxVq7ynbp-jw9g_j5qiPDIZ';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        window.supabaseClient = window.supabaseClient || window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabase = window.supabaseClient;
         async function handleEmailVerification() {
             const usernameEl = document.getElementById('username');
             const urlParams = new URLSearchParams(window.location.search);
@@ -194,23 +195,32 @@
 
                     if (data && data.session && data.session.user) {
                         setUserDisplay(data.session.user);
+                        return;
                     }
+                }
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session && session.user) {
+                    setUserDisplay(session.user);
                 } else {
-                    const { data: { session } } = await supabase.auth.getSession();
-                    if (session && session.user) {
-                        setUserDisplay(session.user);
-                    } else {
-                        usernameEl.textContent = "User";
-                    }
+                    usernameEl.textContent = "User";
                 }
             } catch (err) {
                 console.error("Gagal memproses verifikasi:", err.message);
-                usernameEl.textContent = "Pengguna";
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session && session.user) {
+                    setUserDisplay(session.user);
+                } else {
+                    usernameEl.textContent = "Pengguna";
+                }
             }
         }
         function setUserDisplay(user) {
             const usernameEl = document.getElementById('username');
-            const displayName = user.user_metadata?.nama || user.email;
+            const displayName = user.user_metadata?.nama || 
+                                user.user_metadata?.full_name || 
+                                user.user_metadata?.name || 
+                                user.email || 
+                                "User";
             usernameEl.textContent = displayName;
         }
         handleEmailVerification();
