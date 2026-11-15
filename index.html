@@ -180,50 +180,42 @@
     </table>
 
     <script>
-        const SUPABASE_URL = 'https://oeqvxtzsufqehqhvunqn.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_XcXuyOBPYxVq7ynbp-jw9g_j5qiPDIZ';
-        window.supabaseClient = window.supabaseClient || window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        const supabase = window.supabaseClient;
-        async function handleEmailVerification() {
+        (async function() {
+            const SUPABASE_URL = 'https://oeqvxtzsufqehqhvunqn.supabase.co';
+            const SUPABASE_ANON_KEY = 'sb_publishable_XcXuyOBPYxVq7ynbp-jw9g_j5qiPDIZ';
+            const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             const usernameEl = document.getElementById('username');
             const urlParams = new URLSearchParams(window.location.search);
-            const code = urlParams.get('code');
+            const emailFromParam = urlParams.get('email');
+            function setUserDisplay(user, fallbackEmail) {
+                const displayName = user?.user_metadata?.nama || 
+                                    user?.user_metadata?.full_name || 
+                                    user?.user_metadata?.name || 
+                                    user?.email || 
+                                    fallbackEmail || 
+                                    "User Mikroangkot";
+                if (usernameEl) usernameEl.textContent = displayName;
+            }
             try {
+                const code = urlParams.get('code');
                 if (code) {
-                    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-                    if (error) throw error;
-
-                    if (data && data.session && data.session.user) {
-                        setUserDisplay(data.session.user);
+                    const { data, error } = await sbClient.auth.exchangeCodeForSession(code);
+                    if (!error && data?.session?.user) {
+                        setUserDisplay(data.session.user, emailFromParam);
                         return;
                     }
                 }
-                const { data: { session } } = await supabase.auth.getSession();
-                if (session && session.user) {
-                    setUserDisplay(session.user);
+                const { data: { session } } = await sbClient.auth.getSession();
+                if (session?.user) {
+                    setUserDisplay(session.user, emailFromParam);
                 } else {
-                    usernameEl.textContent = "User";
+                    if (usernameEl) usernameEl.textContent = emailFromParam || "User Mikroangkot";
                 }
             } catch (err) {
-                console.error("Gagal memproses verifikasi:", err.message);
-                const { data: { session } } = await supabase.auth.getSession();
-                if (session && session.user) {
-                    setUserDisplay(session.user);
-                } else {
-                    usernameEl.textContent = "Pengguna";
-                }
+                console.error("Info verifikasi:", err.message);
+                if (usernameEl) usernameEl.textContent = emailFromParam || "User Mikroangkot";
             }
-        }
-        function setUserDisplay(user) {
-            const usernameEl = document.getElementById('username');
-            const displayName = user.user_metadata?.nama || 
-                                user.user_metadata?.full_name || 
-                                user.user_metadata?.name || 
-                                user.email || 
-                                "User";
-            usernameEl.textContent = displayName;
-        }
-        handleEmailVerification();
+        })();
     </script>
 </body>
 </html>
