@@ -181,41 +181,50 @@
 
     <script>
         (async function() {
-            const SUPABASE_URL = 'https://oeqvxtzsufqehqhvunqn.supabase.co';
-            const SUPABASE_ANON_KEY = 'sb_publishable_XcXuyOBPYxVq7ynbp-jw9g_j5qiPDIZ';
-            const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             const usernameEl = document.getElementById('username');
             const urlParams = new URLSearchParams(window.location.search);
+            const tokenHash = urlParams.get('token_hash');
+            const type = urlParams.get('type') || 'signup';
             const emailFromParam = urlParams.get('email');
-            function setUserDisplay(user, fallbackEmail) {
-                const displayName = user?.user_metadata?.nama || 
-                                    user?.user_metadata?.full_name || 
-                                    user?.user_metadata?.name || 
-                                    user?.email || 
-                                    fallbackEmail || 
-                                    "User Mikroangkot";
-                if (usernameEl) usernameEl.textContent = displayName;
+            if (usernameEl && emailFromParam) {
+                usernameEl.textContent = emailFromParam;
             }
             try {
-                const code = urlParams.get('code');
-                if (code) {
-                    const { data, error } = await sbClient.auth.exchangeCodeForSession(code);
-                    if (!error && data?.session?.user) {
-                        setUserDisplay(data.session.user, emailFromParam);
+                const SUPABASE_URL = 'https://oeqvxtzsufqehqhvunqn.supabase.co';
+                const SUPABASE_ANON_KEY = 'sb_publishable_XcXuyOBPYxVq7ynbp-jw9g_j5qiPDIZ';
+                const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                if (tokenHash) {
+                    const { data, error } = await sbClient.auth.verifyOtp({
+                        token_hash: tokenHash,
+                        type: type
+                    });
+                    if (!error && data?.user) {
+                        const user = data.user;
+                        const displayName = user.user_metadata?.nama || 
+                                            user.user_metadata?.full_name || 
+                                            user.user_metadata?.name || 
+                                            user.email || 
+                                            emailFromParam || 
+                                            "User Mikroangkot";
+                        if (usernameEl) usernameEl.textContent = displayName;
                         return;
                     }
                 }
                 const { data: { session } } = await sbClient.auth.getSession();
                 if (session?.user) {
-                    setUserDisplay(session.user, emailFromParam);
-                } else {
-                    if (usernameEl) usernameEl.textContent = emailFromParam || "User Mikroangkot";
+                    const user = session.user;
+                    usernameEl.textContent = user.user_metadata?.nama || user.email || emailFromParam || "User Mikroangkot";
+                } else if (usernameEl && !usernameEl.textContent) {
+                    usernameEl.textContent = emailFromParam || "User Mikroangkot";
                 }
             } catch (err) {
                 console.error("Info verifikasi:", err.message);
-                if (usernameEl) usernameEl.textContent = emailFromParam || "User Mikroangkot";
+                if (usernameEl && !usernameEl.textContent) {
+                    usernameEl.textContent = emailFromParam || "User Mikroangkot";
+                }
             }
         })();
     </script>
+
 </body>
 </html>
