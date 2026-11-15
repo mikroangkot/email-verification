@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Web Apps">
+    <meta name="author" content="Rumah Djigo">
+    <meta name="copyright" content="Rumah Djigo">
+    <meta property="og:title" content="Mikroangkot Team">
+    <meta property="og:description" content="Mikroangkot Team">
+    <meta property="og:image" content="https://cdn.jsdelivr.net/gh/thejaklingko/assets/images/tj.svg">
+    <title>Email Confirmation</title>
+    <link rel="icon" href="https://cdn.jsdelivr.net/gh/thejaklingko/assets/images/tj.svg">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+        table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+        img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+        table { border-collapse: collapse !important; }
+        
+        body {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            min-height: 100vh;
+            background-color: #0f172a;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        /* Styling Utama */
+        .email-wrapper {
+            width: 100%;
+            background-color: #0f172a;
+        }
+        .email-content {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #1e293b;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #334155;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+        .email-header {
+            text-align: center;
+            background-color: #1e293b;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 5px;
+        }
+        .logo-img {
+            display: block;
+            margin: auto;
+            border: 0;
+            outline: none;
+            text-decoration: none;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #f8fafc;
+            letter-spacing: 1px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .logo span {
+            color: #6366f1;
+        }
+        .email-body {
+            padding: 10px;
+            text-align: center;
+            color: #cbd5e1;
+        }
+        .icon-container {
+            margin-bottom: 10px;
+        }
+        .icon-circle {
+            display: inline-block;
+            width: 70px;
+            height: 70px;
+            background-color: rgba(99, 102, 241, 0.15);
+            border-radius: 50%;
+            text-align: center;
+            line-height: 90px;
+        }
+        .email-body h1 {
+            color: #f8fafc;
+            font-size: 24px;
+            margin-top: 0;
+            margin-bottom: 16px;
+        }
+        .email-body p {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: #94a3b8;
+        }
+        .btn-primary {
+            background-color: #6366f1;
+            color: #ffffff !important;
+            padding: 14px 32px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            display: inline-block;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+            transition: background-color 0.2s;
+        }
+        .btn-primary:hover {
+            background-color: #4f46e5;
+        }
+        .email-footer {
+            padding: 24px 40px;
+            text-align: center;
+            background-color: #0f172a;
+            border-top: 1px solid #334155;
+            color: #64748b;
+            font-size: 13px;
+        }
+        .email-footer a {
+            color: #818cf8;
+            text-decoration: none;
+        }
+        /* Responsif */
+        @media screen and (max-width: 600px) {
+            body {
+                align-items: flex-start;
+            }
+            .email-content {
+                width: 100% !important;
+                border-radius: 0 !important;
+                border: none !important;
+            }
+            .email-body, .email-header, .email-footer {
+                padding: 20px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <table class="email-wrapper" role="presentation" border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td align="center">
+                <table class="email-content" role="presentation" border="0" cellpadding="0" cellspacing="0">
+                    <!-- Header / Logo -->
+                    <tr>
+                        <td class="email-header">
+                            <img src="https://cdn.jsdelivr.net/gh/mikroangkot/assets/images/tj.gif" alt="Logo" class="logo-img" class="logo-img" width="170" height="170">
+                            <a href="#!" class="logo">MIKRO<span>ANGKOT</span></a>
+                        </td>
+                    </tr>
+                    <!-- Body Konten -->
+                    <tr>
+                        <td class="email-body">
+                            <div class="icon-container">
+                                <div class="icon-circle">
+                                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                </div>
+                            </div>
+                            <h1>Email Berhasil Dikonfirmasi!</h1>
+                            <p>Halo, <strong id="username" style="color: #f8fafc;"></strong>...!!!<br>Terima kasih telah memverifikasi alamat email Anda. Akun Anda kini sudah aktif dan siap untuk digunakan.</p>
+                            <a href="#!" class="btn-primary">Silahkan Signin di Aplikasi</a>
+                        </td>
+                    </tr>
+                    <!-- Footer -->
+                    <tr>
+                        <td class="email-footer">
+                            <p style="margin: 0;">Butuh bantuan? Hubungi <a href="mailto:mikroangkot@gmail.com">Tim Dukungan Kami</a></p>
+                            <p style="margin: 0;">&copy; 2026 RumahDjigo. Seluruh hak cipta dilindungi.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <script>
+        const SUPABASE_URL = 'https://oeqvxtzsufqehqhvunqn.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_XcXuyOBPYxVq7ynbp-jw9g_j5qiPDIZ';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        async function handleEmailVerification() {
+            const usernameEl = document.getElementById('username');
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            try {
+                if (code) {
+                    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+                    if (error) throw error;
+
+                    if (data && data.session && data.session.user) {
+                        setUserDisplay(data.session.user);
+                    }
+                } else {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (session && session.user) {
+                        setUserDisplay(session.user);
+                    } else {
+                        usernameEl.textContent = "User";
+                    }
+                }
+            } catch (err) {
+                console.error("Gagal memproses verifikasi:", err.message);
+                usernameEl.textContent = "Pengguna";
+            }
+        }
+        function setUserDisplay(user) {
+            const usernameEl = document.getElementById('username');
+            const displayName = user.user_metadata?.nama || user.email;
+            usernameEl.textContent = displayName;
+        }
+        handleEmailVerification();
+    </script>
+</body>
+</html>
